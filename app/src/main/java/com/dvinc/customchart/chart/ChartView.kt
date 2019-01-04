@@ -6,9 +6,7 @@
 package com.dvinc.customchart.chart
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -33,26 +31,35 @@ class ChartView @JvmOverloads constructor(
 
     private val chartBorderPaint = Paint()
 
+    private val gradientPaint = Paint()
+
+    private val gradientPath = Path()
+
     private var points: List<ChartPoint> = mutableListOf()
 
     init {
         pointPaint.color = Color.RED
-        pointPaint.strokeWidth = 10f
+        pointPaint.strokeWidth = 8f
+        pointPaint.isAntiAlias = true
 
-        pointPaint.color = Color.BLACK
-        pointPaint.strokeWidth = 4f
+        linePaint.color = Color.BLACK
+        linePaint.strokeWidth = 4f
+        linePaint.isAntiAlias = true
 
         chartBorderPaint.color = Color.BLACK
         chartBorderPaint.strokeWidth = 4f
+
+        gradientPaint.style = Paint.Style.FILL
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         Log.i(TAG, "onDraw is called")
         canvas?.let {
-            drawPoints(it)
             drawLines(it)
             drawChartBorder(it)
+            drawGradient(it)
+            drawPoints(it)
         }
     }
 
@@ -113,9 +120,32 @@ class ChartView @JvmOverloads constructor(
         val initialY = 0f
         val maxX = width.toFloat()
         val maxY = height.toFloat()
+
         canvas.drawLine(initialX, initialY, maxX, initialY, chartBorderPaint)
         canvas.drawLine(maxX, initialY, maxX, maxY, chartBorderPaint)
         canvas.drawLine(maxX, maxY, initialX, maxY, chartBorderPaint)
         canvas.drawLine(initialX, maxY, initialX, initialY, chartBorderPaint)
+    }
+
+    private fun drawGradient(canvas: Canvas) {
+        val initialX = 0f
+        val initialY = 0f
+        val maxX = width.toFloat()
+        val maxY = height.toFloat()
+
+        val gradient = LinearGradient(initialX, initialY, initialX, height.toFloat(), Color.BLUE, Color.WHITE, Shader.TileMode.CLAMP)
+        gradientPaint.shader = gradient
+
+        gradientPath.reset()
+        gradientPath.moveTo(initialX, maxY)
+
+        points.forEach {
+            gradientPath.lineTo(it.getX(), it.getY())
+        }
+
+        gradientPath.lineTo(maxX, maxY)
+        gradientPath.moveTo(initialX, maxY)
+
+        canvas.drawPath(gradientPath, gradientPaint)
     }
 }
