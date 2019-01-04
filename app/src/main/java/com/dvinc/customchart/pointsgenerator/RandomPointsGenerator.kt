@@ -17,11 +17,11 @@ class RandomPointsGenerator {
 
         private const val MAX_X = 100
 
-        private const val MIN_Y = 0
+        private const val MIN_Y = 30
 
         private const val MAX_Y = 50
 
-        private const val POINTS_COUNT = 20
+        private const val POINTS_COUNT = 40
     }
 
     private val random = Random
@@ -35,8 +35,8 @@ class RandomPointsGenerator {
     }
 
     private fun getRandomPointInRange(minX: Int, maxX: Int, minY: Int, maxY: Int): ChartPoint {
-        val x = random.nextInt(minX, maxX)
-        val y = random.nextInt(minY, maxY)
+        val x = random.nextFloat() * (maxX - minX)
+        val y = random.nextFloat() * (maxY - minY)
         return SimplePoint(x, y)
     }
 }

@@ -6,15 +6,15 @@
 package com.dvinc.customchart.pointsgenerator.points
 
 data class SimplePoint(
-    val xCoordinate: Int,
-    val yCoordinate: Int
+    val xCoordinate: Float,
+    val yCoordinate: Float
 ) : ChartPoint {
 
-    override fun getX(): Int {
+    override fun getX(): Float {
         return xCoordinate
     }
 
-    override fun getY(): Int {
+    override fun getY(): Float {
         return yCoordinate
     }
 }

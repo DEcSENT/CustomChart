@@ -31,6 +31,8 @@ class ChartView @JvmOverloads constructor(
 
     private var linePaint: Paint = Paint()
 
+    private val chartBorderPaint = Paint()
+
     private var points: List<ChartPoint> = mutableListOf()
 
     init {
@@ -39,6 +41,9 @@ class ChartView @JvmOverloads constructor(
 
         pointPaint.color = Color.BLACK
         pointPaint.strokeWidth = 4f
+
+        chartBorderPaint.color = Color.BLACK
+        chartBorderPaint.strokeWidth = 4f
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -47,22 +52,29 @@ class ChartView @JvmOverloads constructor(
         canvas?.let {
             drawPoints(it)
             drawLines(it)
+            drawChartBorder(it)
         }
     }
 
     fun drawPoints(rawPoints: List<ChartPoint>) {
         val convertedPoints: MutableList<ChartPoint> = mutableListOf()
-        val maxX = rawPoints.maxWith(ChartPointXComparator())?.getX() ?: width
-        val maxY = rawPoints.maxWith(ChartPointYComparator())?.getY() ?: height
 
-        val multiplierX = width / maxX
-        val multiplierY = height / maxY
+        val minX = rawPoints.minWith(ChartPointXComparator())?.getX() ?: return
+        val maxX = rawPoints.maxWith(ChartPointXComparator())?.getX() ?: return
+
+        val minY = rawPoints.minWith(ChartPointYComparator())?.getY() ?: return
+        val maxY = rawPoints.maxWith(ChartPointYComparator())?.getY() ?: return
+
+        val rangeX = maxX - minX
+        val rangeY = maxY - minY
+        val multiplierX = width.div(rangeX.toDouble())
+        val multiplierY = height.div(rangeY.toDouble())
 
         rawPoints.forEach {
             convertedPoints.add(
                 SimplePoint(
-                    checkForZeroCoordinate(it.getX()) * multiplierX,
-                    checkForZeroCoordinate(it.getY()) * multiplierY
+                    ((it.getX() - minX) * multiplierX).toFloat(),
+                    ((it.getY() - minY) * multiplierY).toFloat()
                 )
             )
         }
@@ -75,8 +87,8 @@ class ChartView @JvmOverloads constructor(
 
     private fun drawPoints(canvas: Canvas) {
         points.forEach { point ->
-            val x = point.getX().toFloat()
-            val y = point.getY().toFloat()
+            val x = point.getX()
+            val y = point.getY()
             canvas.drawPoint(x, y, pointPaint)
         }
     }
@@ -87,20 +99,23 @@ class ChartView @JvmOverloads constructor(
             val secondPoint = points[index + 1]
 
             canvas.drawLine(
-                firstPoint.getX().toFloat(),
-                firstPoint.getY().toFloat(),
-                secondPoint.getX().toFloat(),
-                secondPoint.getY().toFloat(),
+                firstPoint.getX(),
+                firstPoint.getY(),
+                secondPoint.getX(),
+                secondPoint.getY(),
                 linePaint
             )
         }
     }
 
-    private fun checkForZeroCoordinate(coordinate: Int): Int {
-        return if (coordinate <= 0) {
-            1
-        } else {
-            coordinate
-        }
+    private fun drawChartBorder(canvas: Canvas) {
+        val initialX = 0f
+        val initialY = 0f
+        val maxX = width.toFloat()
+        val maxY = height.toFloat()
+        canvas.drawLine(initialX, initialY, maxX, initialY, chartBorderPaint)
+        canvas.drawLine(maxX, initialY, maxX, maxY, chartBorderPaint)
+        canvas.drawLine(maxX, maxY, initialX, maxY, chartBorderPaint)
+        canvas.drawLine(initialX, maxY, initialX, initialY, chartBorderPaint)
     }
 }

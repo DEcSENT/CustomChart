@@ -7,7 +7,7 @@ package com.dvinc.customchart.pointsgenerator.points
 
 interface ChartPoint {
 
-    fun getX(): Int
+    fun getX(): Float
 
-    fun getY(): Int
+    fun getY(): Float
 }
