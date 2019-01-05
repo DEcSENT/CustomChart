@@ -66,9 +66,9 @@ class ChartView @JvmOverloads constructor(
         Log.i(TAG, "onDraw is called")
         canvas?.let {
             drawChart(it)
-            drawChartBorder(it)
             drawChartGradient(it)
             drawPoints(it)
+            drawChartBorder(it)
         }
     }
 
