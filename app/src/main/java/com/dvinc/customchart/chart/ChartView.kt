@@ -22,7 +22,12 @@ class ChartView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     companion object {
+
         private const val TAG = "ChartView"
+
+        private const val POINT_RADIUS = 4f
+
+        private const val CORNER_RADIUS = 10f
     }
 
     private var pointPaint: Paint = Paint()
@@ -35,6 +40,8 @@ class ChartView @JvmOverloads constructor(
 
     private val gradientPath = Path()
 
+    private val cornerPathEffect = CornerPathEffect(CORNER_RADIUS)
+
     private var points: List<ChartPoint> = mutableListOf()
 
     init {
@@ -45,6 +52,8 @@ class ChartView @JvmOverloads constructor(
         linePaint.color = Color.BLACK
         linePaint.strokeWidth = 4f
         linePaint.isAntiAlias = true
+        linePaint.style = Paint.Style.STROKE
+        linePaint.pathEffect = cornerPathEffect
 
         chartBorderPaint.color = Color.BLACK
         chartBorderPaint.strokeWidth = 4f
@@ -56,9 +65,9 @@ class ChartView @JvmOverloads constructor(
         super.onDraw(canvas)
         Log.i(TAG, "onDraw is called")
         canvas?.let {
-            drawLines(it)
+            drawChart(it)
             drawChartBorder(it)
-            drawGradient(it)
+            drawChartGradient(it)
             drawPoints(it)
         }
     }
@@ -96,23 +105,21 @@ class ChartView @JvmOverloads constructor(
         points.forEach { point ->
             val x = point.getX()
             val y = point.getY()
-            canvas.drawPoint(x, y, pointPaint)
+            canvas.drawCircle(x, y, POINT_RADIUS, pointPaint)
         }
     }
 
-    private fun drawLines(canvas: Canvas) {
-        (0 until points.size - 1).forEach { index ->
-            val firstPoint = points[index]
-            val secondPoint = points[index + 1]
-
-            canvas.drawLine(
-                firstPoint.getX(),
-                firstPoint.getY(),
-                secondPoint.getX(),
-                secondPoint.getY(),
-                linePaint
-            )
+    private fun drawChart(canvas: Canvas) {
+        val linePath = Path()
+        if (points.isNotEmpty()) {
+            points.forEachIndexed { index, chartPoint ->
+                with(chartPoint) {
+                    if (index == 0) linePath.moveTo(getX(), getY())
+                    else linePath.lineTo(getX(), getY())
+                }
+            }
         }
+        canvas.drawPath(linePath, linePaint)
     }
 
     private fun drawChartBorder(canvas: Canvas) {
@@ -127,7 +134,7 @@ class ChartView @JvmOverloads constructor(
         canvas.drawLine(initialX, maxY, initialX, initialY, chartBorderPaint)
     }
 
-    private fun drawGradient(canvas: Canvas) {
+    private fun drawChartGradient(canvas: Canvas) {
         val initialX = 0f
         val initialY = 0f
         val maxX = width.toFloat()

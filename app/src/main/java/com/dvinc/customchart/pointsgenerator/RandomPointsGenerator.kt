@@ -21,7 +21,7 @@ class RandomPointsGenerator {
 
         private const val MAX_Y = 50
 
-        private const val POINTS_COUNT = 40
+        private const val POINTS_COUNT = 20
     }
 
     private val random = Random
