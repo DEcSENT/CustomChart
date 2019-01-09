@@ -44,6 +44,8 @@ class ChartView @JvmOverloads constructor(
 
     private var points: List<ChartPoint> = mutableListOf()
 
+    private var shouldShowDots: Boolean = false
+
     init {
         pointPaint.color = Color.RED
         pointPaint.strokeWidth = 8f
@@ -67,37 +69,14 @@ class ChartView @JvmOverloads constructor(
         canvas?.let {
             drawChart(it)
             drawChartGradient(it)
-            drawPoints(it)
+            if (shouldShowDots) drawPoints(it)
             drawChartBorder(it)
         }
     }
 
-    fun drawPoints(rawPoints: List<ChartPoint>) {
-        val convertedPoints: MutableList<ChartPoint> = mutableListOf()
-
-        val minX = rawPoints.minWith(ChartPointXComparator())?.getX() ?: return
-        val maxX = rawPoints.maxWith(ChartPointXComparator())?.getX() ?: return
-
-        val minY = rawPoints.minWith(ChartPointYComparator())?.getY() ?: return
-        val maxY = rawPoints.maxWith(ChartPointYComparator())?.getY() ?: return
-
-        val rangeX = maxX - minX
-        val rangeY = maxY - minY
-        val multiplierX = width.div(rangeX.toDouble())
-        val multiplierY = height.div(rangeY.toDouble())
-
-        rawPoints.forEach {
-            convertedPoints.add(
-                SimplePoint(
-                    ((it.getX() - minX) * multiplierX).toFloat(),
-                    ((it.getY() - minY) * multiplierY).toFloat()
-                )
-            )
-        }
-
-        convertedPoints.sortBy { it.getX() }
-
-        points = convertedPoints
+    fun drawPoints(rawPoints: List<ChartPoint>, showDots: Boolean) {
+        shouldShowDots = showDots
+        points = prepareChartPointsToDraw(rawPoints)
         invalidate()
     }
 
@@ -154,5 +133,32 @@ class ChartView @JvmOverloads constructor(
         gradientPath.moveTo(initialX, maxY)
 
         canvas.drawPath(gradientPath, gradientPaint)
+    }
+
+    private fun prepareChartPointsToDraw(rawPoints: List<ChartPoint>): List<ChartPoint> {
+        val convertedPoints: MutableList<ChartPoint> = mutableListOf()
+
+        val minX = rawPoints.minWith(ChartPointXComparator())?.getX() ?: return emptyList()
+        val maxX = rawPoints.maxWith(ChartPointXComparator())?.getX() ?: return emptyList()
+
+        val minY = rawPoints.minWith(ChartPointYComparator())?.getY() ?: return emptyList()
+        val maxY = rawPoints.maxWith(ChartPointYComparator())?.getY() ?: return emptyList()
+
+        val rangeX = maxX - minX
+        val rangeY = maxY - minY
+        val multiplierX = width.div(rangeX.toDouble())
+        val multiplierY = height.div(rangeY.toDouble())
+
+        rawPoints.forEach {
+            convertedPoints.add(
+                SimplePoint(
+                    ((it.getX() - minX) * multiplierX).toFloat(),
+                    ((it.getY() - minY) * multiplierY).toFloat()
+                )
+            )
+        }
+
+        convertedPoints.sortBy { it.getX() }
+        return convertedPoints
     }
 }

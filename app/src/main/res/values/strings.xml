@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">CustomChart</string>
     <string name="activity_main_draw_chart_button_text">Draw chart</string>
+    <string name="activity_main_dots_checkbox">Show dots</string>
 </resources>
